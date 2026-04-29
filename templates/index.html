@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Diário Alimentar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">Diário Alimentar</span>
+      </div>
+      <button class="btn-pdf" id="btnExportarPDF">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        Exportar PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- CALENDÁRIO -->
+  <div class="calendario-wrapper">
+    <div class="calendario-header">
+      <button class="cal-nav" id="prevMes">&#8249;</button>
+      <span class="cal-mes-ano" id="calMesAno"></span>
+      <button class="cal-nav" id="nextMes">&#8250;</button>
+    </div>
+    <div class="cal-dias-semana">
+      <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- DIA SELECIONADO -->
+  <main class="main-content">
+    <div class="dia-titulo-wrap">
+      <h2 class="dia-titulo" id="diaTitulo">Selecione um dia</h2>
+      <span class="dia-sub" id="diaSub">Toque em uma data no calendário</span>
+    </div>
+
+    <!-- PERÍODOS -->
+    <div class="periodos" id="periodos">
+      <div class="periodo-card" data-periodo="manha">
+        <div class="periodo-header">
+          <span class="periodo-icon">☀️</span>
+          <span class="periodo-nome">Manhã</span>
+          <div class="periodo-actions">
+            <button class="btn-add-tipo" data-tipo="refeicao" data-periodo="manha">+ Refeição</button>
+            <button class="btn-add-tipo btn-lanche" data-tipo="lanche" data-periodo="manha">+ Lanche</button>
+          </div>
+        </div>
+        <div class="periodo-entradas" id="entradas-manha"></div>
+      </div>
+
+      <div class="periodo-card" data-periodo="tarde">
+        <div class="periodo-header">
+          <span class="periodo-icon">🌤️</span>
+          <span class="periodo-nome">Tarde</span>
+          <div class="periodo-actions">
+            <button class="btn-add-tipo" data-tipo="refeicao" data-periodo="tarde">+ Refeição</button>
+            <button class="btn-add-tipo btn-lanche" data-tipo="lanche" data-periodo="tarde">+ Lanche</button>
+          </div>
+        </div>
+        <div class="periodo-entradas" id="entradas-tarde"></div>
+      </div>
+
+      <div class="periodo-card" data-periodo="noite">
+        <div class="periodo-header">
+          <span class="periodo-icon">🌙</span>
+          <span class="periodo-nome">Noite</span>
+          <div class="periodo-actions">
+            <button class="btn-add-tipo" data-tipo="refeicao" data-periodo="noite">+ Refeição</button>
+            <button class="btn-add-tipo btn-lanche" data-tipo="lanche" data-periodo="noite">+ Lanche</button>
+          </div>
+        </div>
+        <div class="periodo-entradas" id="entradas-noite"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL REFEIÇÃO -->
+  <div class="modal-overlay" id="modalRefeicao">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-titulo" id="modalTitulo">🍽️ Nova Refeição</h3>
+        <button class="modal-close" id="fecharModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="campo-horario">
+          <label>Horário</label>
+          <input type="time" id="inputHorario" class="input-horario" />
+        </div>
+
+        <!-- CAMPOS REFEIÇÃO -->
+        <div id="camposRefeicao">
+          <label class="label-alimentos">Alimentos</label>
+          <div id="listaAlimentos"></div>
+          <button class="btn-add-alimento" id="btnAddAlimento">+ Adicionar alimento</button>
+        </div>
+
+        <!-- CAMPO LANCHE -->
+        <div id="campoLanche" style="display:none">
+          <label class="label-alimentos">O que você comeu/bebeu?</label>
+          <div class="alimento-row">
+            <input type="text" class="input-alimento" id="lancheName" placeholder="ex: bala de morango, suco de laranja..." />
+          </div>
+          <div class="alimento-medida-row">
+            <input type="text" class="input-qtd" id="lancheQtd" placeholder="Qtd (ex: 1, 200...)" />
+            <select class="select-unidade" id="lancheUnidade">
+              <option value="">— unidade —</option>
+              <option value="unidade(s)">unidade(s)</option>
+              <option value="g">g (grama)</option>
+              <option value="ml">ml</option>
+              <option value="colher de chá">colher de chá</option>
+              <option value="colher de sopa">colher de sopa</option>
+              <option value="colher de sobremesa">colher de sobremesa</option>
+              <option value="colher grande">colher grande</option>
+              <option value="xícara">xícara</option>
+              <option value="xícara de chá">xícara de chá</option>
+              <option value="xícara de café">xícara de café</option>
+              <option value="copo">copo</option>
+              <option value="fatia">fatia</option>
+              <option value="pedaço">pedaço</option>
+              <option value="porção">porção</option>
+              <option value="punhado">punhado</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" id="btnCancelar">Cancelar</button>
+        <button class="btn-salvar" id="btnSalvar">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PDF -->
+  <div class="modal-overlay" id="modalPDF">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-titulo">📄 Exportar PDF</h3>
+        <button class="modal-close" id="fecharModalPDF">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="campo-horario">
+          <label>Seu nome (para o relatório)</label>
+          <input type="text" id="pdfNome" class="input-horario" placeholder="ex: Maria Silva" />
+        </div>
+        <div class="campo-horario" style="margin-top:12px">
+          <label>Data início</label>
+          <input type="date" id="pdfInicio" class="input-horario" />
+        </div>
+        <div class="campo-horario" style="margin-top:12px">
+          <label>Data fim</label>
+          <input type="date" id="pdfFim" class="input-horario" />
+        </div>
+        <p class="pdf-obs">Deixe as datas em branco para exportar <b>todos os dias</b> registrados.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" id="btnCancelarPDF">Cancelar</button>
+        <button class="btn-salvar" id="btnGerarPDF">Gerar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
