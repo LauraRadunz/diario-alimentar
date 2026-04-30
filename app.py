@@ -18,17 +18,28 @@ from functools import wraps
 
 # ── Fontes ─────────────────────────────────────────────────────────────────────
 import reportlab as _rl
-_FD = os.path.join(os.path.dirname(_rl.__file__), "fonts")
-def _reg(a,f):
-    p=os.path.join(_FD,f)
-    if os.path.exists(p):
-        try: pdfmetrics.registerFont(TTFont(a,p)); return True
-        except: pass
+
+def _reg(a, f):
+    candidatos = [
+        os.path.join(os.path.dirname(_rl.__file__), "fonts", f),
+        os.path.join("/usr/share/fonts/truetype/dejavu", f),
+        os.path.join("/usr/share/fonts", f),
+        os.path.join(os.path.dirname(__file__), "fonts", f),
+    ]
+    for p in candidatos:
+        if os.path.exists(p):
+            try:
+                pdfmetrics.registerFont(TTFont(a, p))
+                return True
+            except Exception:
+                pass
     return False
+
 _ok   = _reg("Body","DejaVuSans.ttf") and _reg("Body-B","DejaVuSans-Bold.ttf") and _reg("Body-I","DejaVuSans-Oblique.ttf")
 FONT  = "Body"   if _ok else "Helvetica"
 FONT_B= "Body-B" if _ok else "Helvetica-Bold"
 FONT_I= "Body-I" if _ok else "Helvetica-Oblique"
+print(f"[PDF] Fonte: {'DejaVu (OK)' if _ok else 'Helvetica (fallback)'}")
 
 # ── Flask ──────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
