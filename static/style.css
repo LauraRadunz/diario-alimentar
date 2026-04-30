@@ -655,3 +655,43 @@ label, .label-alimentos {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* ── Drag & Drop ── */
+.drag-handle {
+  display: inline-block;
+  cursor: grab;
+  color: #ccc;
+  font-size: 18px;
+  padding: 0 6px 0 0;
+  user-select: none;
+  touch-action: none;
+  vertical-align: middle;
+  line-height: 1;
+}
+.drag-handle:active { cursor: grabbing; }
+.alimento-row-wrap.drag-over {
+  border-color: var(--verde-claro);
+  background: var(--verde-bg);
+  box-shadow: 0 0 0 2px var(--verde-palido);
+}
+
+/* ── Botões de editar/deletar na entrada ── */
+.entrada-btns {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+.btn-editar {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.btn-editar:hover { color: var(--verde-medio); background: var(--verde-bg); }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <title>Cadastro — Diário Alimentar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/auth.css"/>
+</head>
+<body class="auth-body">
+  <div class="auth-card" id="formCard">
+    <div class="auth-logo">
+      <span class="logo-leaf">🌿</span>
+      <span class="auth-logo-text">Diário Alimentar</span>
+    </div>
+    <h1 class="auth-titulo">Solicitar acesso</h1>
+    <p class="auth-sub">Preencha os dados abaixo. Após o cadastro, aguarde a aprovação para entrar.</p>
+
+    <div id="auth-erro" class="auth-erro" style="display:none"></div>
+
+    <div class="auth-form">
+      <div class="auth-campo">
+        <label>Nome completo</label>
+        <input type="text" id="nome" placeholder="Maria Silva" autocomplete="name"/>
+      </div>
+      <div class="auth-campo">
+        <label>Usuário</label>
+        <input type="text" id="username" placeholder="maria.silva" autocapitalize="none" autocomplete="username"/>
+      </div>
+      <div class="auth-campo">
+        <label>E-mail</label>
+        <input type="email" id="email" placeholder="maria@email.com" autocomplete="email"/>
+      </div>
+      <div class="auth-campo">
+        <label>Senha <span style="font-weight:400;color:#aaa">(mín. 6 caracteres)</span></label>
+        <input type="password" id="senha" placeholder="••••••••" autocomplete="new-password"/>
+      </div>
+      <button class="auth-btn" id="btnCadastro">Solicitar acesso</button>
+    </div>
+    <p class="auth-link">Já tem conta? <a href="/login">Entrar</a></p>
+  </div>
+
+  <!-- Tela de sucesso -->
+  <div class="auth-card" id="successCard" style="display:none; text-align:center">
+    <div style="font-size:56px;margin-bottom:12px">✅</div>
+    <h1 class="auth-titulo">Solicitação enviada!</h1>
+    <p class="auth-sub" style="margin-top:8px">
+      Seu cadastro foi recebido e está aguardando aprovação.<br>
+      Quando liberado, você poderá entrar normalmente.
+    </p>
+    <a href="/login" class="auth-btn" style="display:block;margin-top:24px;text-decoration:none;text-align:center">Voltar ao login</a>
+  </div>
+
+  <script>
+    const btn  = document.getElementById('btnCadastro');
+    const erro = document.getElementById('auth-erro');
+
+    btn.addEventListener('click', async () => {
+      const nome     = document.getElementById('nome').value.trim();
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const email    = document.getElementById('email').value.trim().toLowerCase();
+      const senha    = document.getElementById('senha').value;
+      if (!nome || !username || !email || !senha) { show('Preencha todos os campos.'); return; }
+      btn.textContent = 'Enviando...'; btn.disabled = true;
+      try {
+        const r = await fetch('/api/cadastro', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({nome, username, email, senha})
+        });
+        const d = await r.json();
+        if (d.sucesso) {
+          document.getElementById('formCard').style.display = 'none';
+          document.getElementById('successCard').style.display = 'block';
+        } else { show(d.erro); }
+      } catch { show('Erro de conexão.'); }
+      finally { btn.textContent = 'Solicitar acesso'; btn.disabled = false; }
+    });
+
+    function show(msg) { erro.textContent = msg; erro.style.display = 'block'; }
+  </script>
+</body>
+</html>

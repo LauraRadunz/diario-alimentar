@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <title>Entrar — Diário Alimentar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/auth.css"/>
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-leaf">🌿</span>
+      <span class="auth-logo-text">Diário Alimentar</span>
+    </div>
+    <h1 class="auth-titulo">Bem-vinda de volta</h1>
+    <p class="auth-sub">Entre com sua conta para continuar</p>
+
+    <div id="auth-erro" class="auth-erro" style="display:none"></div>
+
+    <div class="auth-form">
+      <div class="auth-campo">
+        <label>Usuário</label>
+        <input type="text" id="username" placeholder="seu.usuario" autocomplete="username" autocapitalize="none"/>
+      </div>
+      <div class="auth-campo">
+        <label>Senha</label>
+        <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="auth-btn" id="btnLogin">Entrar</button>
+    </div>
+
+    <p class="auth-link">Não tem conta? <a href="/cadastro">Solicitar acesso</a></p>
+  </div>
+
+  <script>
+    const btn = document.getElementById('btnLogin');
+    const erro = document.getElementById('auth-erro');
+
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const senha    = document.getElementById('senha').value;
+      if (!username || !senha) { mostrarErro('Preencha todos os campos.'); return; }
+      btn.textContent = 'Entrando...'; btn.disabled = true;
+      try {
+        const r = await fetch('/api/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username, senha})
+        });
+        const d = await r.json();
+        if (d.sucesso) { window.location.href = '/'; }
+        else { mostrarErro(d.erro); }
+      } catch { mostrarErro('Erro de conexão. Tente novamente.'); }
+      finally { btn.textContent = 'Entrar'; btn.disabled = false; }
+    }
+
+    function mostrarErro(msg) {
+      erro.textContent = msg; erro.style.display = 'block';
+    }
+
+    btn.addEventListener('click', login);
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  </script>
+</body>
+</html>

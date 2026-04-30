@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <title>Admin — Diário Alimentar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">Admin</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <a href="/" class="btn-pdf">← Diário</a>
+        <button class="btn-pdf" id="btnLogout">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <h2 class="admin-titulo">Gerenciar usuários</h2>
+
+    <div class="admin-tabs">
+      <button class="admin-tab ativo" data-tab="pendentes">Pendentes <span class="badge-count" id="cntPendente"></span></button>
+      <button class="admin-tab" data-tab="ativos">Ativos</button>
+      <button class="admin-tab" data-tab="bloqueados">Bloqueados</button>
+    </div>
+
+    <div id="tabPendentes" class="admin-lista"></div>
+    <div id="tabAtivos"    class="admin-lista" style="display:none"></div>
+    <div id="tabBloqueados"class="admin-lista" style="display:none"></div>
+  </main>
+
+  <script src="/static/admin.js"></script>
+</body>
+</html>

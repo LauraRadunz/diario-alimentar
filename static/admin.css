@@ -1,0 +1,125 @@
+.admin-main {
+  max-width: 600px;
+  margin: 24px auto;
+  padding: 0 14px;
+}
+
+.admin-titulo {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--verde-escuro);
+  margin-bottom: 18px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  border-bottom: 2px solid var(--cinza-borda);
+  padding-bottom: 0;
+}
+
+.admin-tab {
+  background: none;
+  border: none;
+  padding: 8px 16px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cinza-texto);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-tab.ativo {
+  color: var(--verde-escuro);
+  border-bottom-color: var(--verde-medio);
+  font-weight: 600;
+}
+
+.badge-count {
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.badge-count:empty { display: none; }
+
+.admin-lista { display: flex; flex-direction: column; gap: 12px; }
+
+.user-card {
+  background: #fff;
+  border: 1.5px solid var(--cinza-borda);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.user-info { flex: 1; }
+
+.user-nome {
+  font-weight: 600;
+  font-size: 15px;
+  color: #222;
+}
+
+.user-detalhe {
+  font-size: 12px;
+  color: var(--cinza-texto);
+  margin-top: 2px;
+}
+
+.user-acoes { display: flex; gap: 8px; flex-shrink: 0; }
+
+.btn-aprovar, .btn-bloquear, .btn-reativar {
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-aprovar  { background: var(--verde-medio); color: #fff; }
+.btn-bloquear { background: #FEE2E2; color: #B91C1C; }
+.btn-reativar { background: var(--verde-bg); color: var(--verde-medio); border: 1.5px solid var(--verde-medio); }
+
+.btn-aprovar:hover, .btn-bloquear:hover, .btn-reativar:hover { opacity: 0.8; }
+
+.vazio-admin {
+  text-align: center;
+  color: #bbb;
+  font-size: 14px;
+  padding: 32px 0;
+  font-style: italic;
+}
+
+.status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.status-pendente  { background: #FEF3C7; color: #92400E; }
+.status-ativo     { background: #D1FAE5; color: #065F46; }
+.status-bloqueado { background: #FEE2E2; color: #991B1B; }
