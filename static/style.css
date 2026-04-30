@@ -729,7 +729,7 @@ label, .label-alimentos {
   top: 8px;
   right: 8px;
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 .btn-editar {
   background: none;
