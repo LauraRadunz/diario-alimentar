@@ -18,28 +18,17 @@ from functools import wraps
 
 # ── Fontes ─────────────────────────────────────────────────────────────────────
 import reportlab as _rl
-
-def _reg(a, f):
-    candidatos = [
-        os.path.join(os.path.dirname(_rl.__file__), "fonts", f),
-        os.path.join("/usr/share/fonts/truetype/dejavu", f),
-        os.path.join("/usr/share/fonts", f),
-        os.path.join(os.path.dirname(__file__), "fonts", f),
-    ]
-    for p in candidatos:
-        if os.path.exists(p):
-            try:
-                pdfmetrics.registerFont(TTFont(a, p))
-                return True
-            except Exception:
-                pass
+_FD = os.path.join(os.path.dirname(_rl.__file__), "fonts")
+def _reg(a,f):
+    p=os.path.join(_FD,f)
+    if os.path.exists(p):
+        try: pdfmetrics.registerFont(TTFont(a,p)); return True
+        except: pass
     return False
-
 _ok   = _reg("Body","DejaVuSans.ttf") and _reg("Body-B","DejaVuSans-Bold.ttf") and _reg("Body-I","DejaVuSans-Oblique.ttf")
 FONT  = "Body"   if _ok else "Helvetica"
 FONT_B= "Body-B" if _ok else "Helvetica-Bold"
 FONT_I= "Body-I" if _ok else "Helvetica-Oblique"
-print(f"[PDF] Fonte: {'DejaVu (OK)' if _ok else 'Helvetica (fallback)'}")
 
 # ── Flask ──────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -255,52 +244,50 @@ def fmt_data(iso):
 def build_pdf(nome,dias_rows,conn,user_id):
     VD=colors.HexColor("#1E3A08");VM=colors.HexColor("#3A6B18")
     VP=colors.HexColor("#D6EDB8");AM=colors.HexColor("#8B6914")
-    BE=colors.HexColor("#6B3FA0")  # belisco – roxo suave
+    BE=colors.HexColor("#6B3FA0")
     CZ=colors.HexColor("#555555");CL=colors.HexColor("#888888")
+    SEP=colors.HexColor("#EAF2E0")  # separador leve entre inserções
     buf=io.BytesIO()
     doc=SimpleDocTemplate(buf,pagesize=A4,
                           rightMargin=2.2*cm,leftMargin=2.2*cm,
-                          topMargin=3*cm,bottomMargin=2.2*cm)
+                          topMargin=3.5*cm,bottomMargin=2.5*cm)
     s=getSampleStyleSheet()
-    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],**{"fontName":FONT,**kw})
+    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],fontName=FONT,**kw)
     st=dict(
-        titulo  =P("t",  fontName=FONT_B,fontSize=22,textColor=VD,alignment=TA_CENTER,spaceAfter=4),
-        subtit  =P("s",  fontSize=11,textColor=CZ,alignment=TA_CENTER,spaceAfter=4),
-        per_l   =P("pl", fontSize=10,textColor=CL,alignment=TA_CENTER,spaceAfter=14),
-        dia     =P("d",  fontName=FONT_B,fontSize=13,textColor=VD,spaceBefore=18,spaceAfter=4),
-        periodo =P("p",  fontName=FONT_B,fontSize=11,textColor=VM,spaceBefore=10,spaceAfter=4,leftIndent=4),
+        titulo  =P("t",  fontName=FONT_B,fontSize=22,textColor=VD,alignment=TA_CENTER,spaceAfter=8),
+        subtit  =P("s",  fontSize=11,textColor=CZ,alignment=TA_CENTER,spaceAfter=6),
+        per_l   =P("pl", fontSize=10,textColor=CL,alignment=TA_CENTER,spaceAfter=18),
+        dia     =P("d",  fontName=FONT_B,fontSize=13,textColor=VD,spaceBefore=20,spaceAfter=4),
+        periodo =P("p",  fontName=FONT_B,fontSize=11,textColor=VM,spaceBefore=12,spaceAfter=6,leftIndent=4),
         hora    =P("h",  fontName=FONT_I,fontSize=9,textColor=CL,spaceAfter=3,leftIndent=10),
-        alimento=P("a",  fontSize=10,textColor=colors.HexColor("#222"),spaceAfter=2,leftIndent=18,leading=14),
-        ingred  =P("i",  fontName=FONT_I,fontSize=9,textColor=CL,spaceAfter=1,leftIndent=30,leading=13),
-        lanche  =P("l",  fontSize=10,textColor=AM,spaceAfter=2,leftIndent=10,leading=14),
-        belisco =P("b",  fontSize=10,textColor=BE,spaceAfter=2,leftIndent=10,leading=14),
-        obs     =P("o",  fontName=FONT_I,fontSize=9,textColor=CZ,spaceAfter=4,leftIndent=4,
-                   borderPad=4),
-        rodape  =P("r",  fontSize=8,textColor=CL,alignment=TA_CENTER),
+        alimento=P("a",  fontSize=10,textColor=colors.HexColor("#222"),spaceAfter=2,leftIndent=18,leading=15),
+        ingred  =P("i",  fontName=FONT_I,fontSize=9,textColor=CL,spaceAfter=2,leftIndent=30,leading=13),
+        lanche  =P("l",  fontSize=10,textColor=AM,spaceAfter=2,leftIndent=10,leading=15),
+        belisco =P("b",  fontSize=10,textColor=BE,spaceAfter=2,leftIndent=10,leading=15),
+        obs     =P("o",  fontName=FONT_I,fontSize=9,textColor=CZ,spaceAfter=6,leftIndent=4),
+        rodape  =P("r",  fontSize=8,textColor=CL,alignment=TA_CENTER,leading=13),
     )
     story=[
-        Spacer(1,.4*cm),
+        Spacer(1,.6*cm),
         Paragraph("Diário Alimentar",st["titulo"]),
-        Spacer(1,.2*cm),
+        Spacer(1,.15*cm),
         Paragraph(f"Nome: {nome}",st["subtit"]),
     ]
     if dias_rows:
         prim=fmt_data(dias_rows[0]["data"]); ult=fmt_data(dias_rows[-1]["data"])
         story.append(Paragraph(prim if prim==ult else f"{prim}  até  {ult}",st["per_l"]))
-    story.append(HRFlowable(width="100%",thickness=2,color=VM,spaceAfter=14))
+    story.append(HRFlowable(width="100%",thickness=2,color=VM,spaceAfter=16))
 
     for row in dias_rows:
         iso=row["data"]
         story.append(Paragraph(fmt_data(iso),st["dia"]))
-        story.append(HRFlowable(width="100%",thickness=.6,color=VP,spaceAfter=6))
+        story.append(HRFlowable(width="100%",thickness=.6,color=VP,spaceAfter=8))
 
-        # Observação do dia
         obs_row=conn.execute(
             "SELECT obs FROM obs_dia WHERE usuario_id=? AND data=?",(user_id,iso)
         ).fetchone()
         if obs_row and obs_row["obs"].strip():
             story.append(Paragraph(f"📝 {obs_row['obs']}",st["obs"]))
-            story.append(Spacer(1,.1*cm))
 
         refs=conn.execute(
             "SELECT * FROM refeicoes WHERE data=? AND usuario_id=? ORDER BY periodo,horario",(iso,user_id)
@@ -312,7 +299,13 @@ def build_pdf(nome,dias_rows,conn,user_id):
         for pk,plabel in PERIODOS.items():
             if not pp[pk]: continue
             story.append(Paragraph(plabel,st["periodo"]))
-            for r in pp[pk]:
+            for idx,r in enumerate(pp[pk]):
+                # Separador leve entre inserções do mesmo turno (não antes da primeira)
+                if idx > 0:
+                    story.append(Spacer(1,.15*cm))
+                    story.append(HRFlowable(width="85%",thickness=.4,color=SEP,
+                                            hAlign="RIGHT",spaceAfter=6))
+
                 als=conn.execute(
                     "SELECT * FROM alimentos WHERE refeicao_id=? ORDER BY ordem,id",(r["id"],)
                 ).fetchall()
@@ -343,13 +336,17 @@ def build_pdf(nome,dias_rows,conn,user_id):
                         story.append(Paragraph(f"•  {a['nome']}{med}",st["alimento"]))
                         if a["ingredientes"] and a["ingredientes"].strip():
                             story.append(Paragraph(f"↳ {a['ingredientes']}",st["ingred"]))
-                story.append(Spacer(1,.12*cm))
-        story.append(Spacer(1,.4*cm))
 
-    story.append(HRFlowable(width="100%",thickness=.5,color=VP))
-    story.append(Spacer(1,.15*cm))
+        story.append(Spacer(1,.5*cm))
+
+    story.append(HRFlowable(width="100%",thickness=.5,color=VP,spaceAfter=8))
     story.append(Paragraph(
-        f"Relatório gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}  ·  Diário Alimentar",
+        f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}  ·  Diário Alimentar",
+        st["rodape"]
+    ))
+    story.append(Spacer(1,.1*cm))
+    story.append(Paragraph(
+        "Desenvolvido com carinho por Laura Radünz Pedro — porque registrar o que se come também é um ato de cuidado.",
         st["rodape"]
     ))
     doc.build(story); buf.seek(0); return buf
@@ -357,21 +354,16 @@ def build_pdf(nome,dias_rows,conn,user_id):
 @app.route("/api/exportar-pdf", methods=["POST"])
 @login_required
 def exportar_pdf():
-    try:
-        body=request.json; di=body.get("data_inicio"); df=body.get("data_fim")
-        nome=(body.get("nome_paciente") or session.get("usuario_nome","Paciente")).strip()
-        conn=get_db(); params=[uid()]
-        query="SELECT DISTINCT data FROM refeicoes WHERE usuario_id=?"
-        if di and df: query+=" AND data BETWEEN ? AND ?"; params+=[di,df]
-        query+=" ORDER BY data"
-        dias=conn.execute(query,params).fetchall()
-        buf=build_pdf(nome,dias,conn,uid()); conn.close()
-        safe=nome.replace(" ","_").replace("/","_")
-        return send_file(buf,as_attachment=True,download_name=f"diario_alimentar_{safe}.pdf",mimetype="application/pdf")
-    except Exception as e:
-        import traceback
-        print("[PDF ERROR]", traceback.format_exc())
-        return jsonify({"erro": str(e)}), 500
+    body=request.json; di=body.get("data_inicio"); df=body.get("data_fim")
+    nome=(body.get("nome_paciente") or session.get("usuario_nome","Paciente")).strip()
+    conn=get_db(); params=[uid()]
+    query="SELECT DISTINCT data FROM refeicoes WHERE usuario_id=?"
+    if di and df: query+=" AND data BETWEEN ? AND ?"; params+=[di,df]
+    query+=" ORDER BY data"
+    dias=conn.execute(query,params).fetchall()
+    buf=build_pdf(nome,dias,conn,uid()); conn.close()
+    safe=nome.replace(" ","_").replace("/","_")
+    return send_file(buf,as_attachment=True,download_name=f"diario_alimentar_{safe}.pdf",mimetype="application/pdf")
 
 if __name__=="__main__":
     port=int(os.environ.get("PORT",5000))

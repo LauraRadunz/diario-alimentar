@@ -402,18 +402,18 @@ body {
 }
 
 .btn-deletar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
-  font-size: 15px;
+  font-size: 16px;
   color: #ccc;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 2px 4px;
   border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s;
   line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
 
@@ -665,6 +665,20 @@ label, .label-alimentos {
 /* Vazio */
 .vazio-msg { font-size: 13px; color: #bbb; text-align: center; padding: 8px 0 4px; font-style: italic; }
 
+/* ===== RODAPÉ DO SITE ===== */
+.site-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-bottom: 20px;
+  font-size: 12px;
+  color: #aac08a;
+  letter-spacing: 0.2px;
+}
+.site-footer strong {
+  color: var(--verde-medio);
+  font-weight: 600;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -712,25 +726,20 @@ label, .label-alimentos {
 /* ── Botões de editar/deletar na entrada ── */
 .entrada-btns {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 8px;
+  right: 8px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
+  gap: 4px;
 }
 .btn-editar {
   background: none;
   border: none;
-  font-size: 15px;
-  color: #bbb;
+  font-size: 14px;
+  color: #aaa;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 2px 4px;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
   line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .btn-editar:hover { color: var(--verde-medio); background: var(--verde-bg); }
