@@ -402,18 +402,18 @@ body {
 }
 
 .btn-deletar {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: none;
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   color: #ccc;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 4px 6px;
   border-radius: 6px;
-  transition: color 0.15s;
+  transition: color 0.15s, background 0.15s;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
 
@@ -712,20 +712,25 @@ label, .label-alimentos {
 /* ── Botões de editar/deletar na entrada ── */
 .entrada-btns {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
 }
 .btn-editar {
   background: none;
   border: none;
-  font-size: 14px;
-  color: #aaa;
+  font-size: 15px;
+  color: #bbb;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 4px 6px;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .btn-editar:hover { color: var(--verde-medio); background: var(--verde-bg); }

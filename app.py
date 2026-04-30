@@ -18,17 +18,28 @@ from functools import wraps
 
 # ── Fontes ─────────────────────────────────────────────────────────────────────
 import reportlab as _rl
-_FD = os.path.join(os.path.dirname(_rl.__file__), "fonts")
-def _reg(a,f):
-    p=os.path.join(_FD,f)
-    if os.path.exists(p):
-        try: pdfmetrics.registerFont(TTFont(a,p)); return True
-        except: pass
+
+def _reg(a, f):
+    candidatos = [
+        os.path.join(os.path.dirname(_rl.__file__), "fonts", f),
+        os.path.join("/usr/share/fonts/truetype/dejavu", f),
+        os.path.join("/usr/share/fonts", f),
+        os.path.join(os.path.dirname(__file__), "fonts", f),
+    ]
+    for p in candidatos:
+        if os.path.exists(p):
+            try:
+                pdfmetrics.registerFont(TTFont(a, p))
+                return True
+            except Exception:
+                pass
     return False
+
 _ok   = _reg("Body","DejaVuSans.ttf") and _reg("Body-B","DejaVuSans-Bold.ttf") and _reg("Body-I","DejaVuSans-Oblique.ttf")
 FONT  = "Body"   if _ok else "Helvetica"
 FONT_B= "Body-B" if _ok else "Helvetica-Bold"
 FONT_I= "Body-I" if _ok else "Helvetica-Oblique"
+print(f"[PDF] Fonte: {'DejaVu (OK)' if _ok else 'Helvetica (fallback)'}")
 
 # ── Flask ──────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -251,7 +262,7 @@ def build_pdf(nome,dias_rows,conn,user_id):
                           rightMargin=2.2*cm,leftMargin=2.2*cm,
                           topMargin=3*cm,bottomMargin=2.2*cm)
     s=getSampleStyleSheet()
-    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],fontName=FONT,**kw)
+    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],**{"fontName":FONT,**kw})
     st=dict(
         titulo  =P("t",  fontName=FONT_B,fontSize=22,textColor=VD,alignment=TA_CENTER,spaceAfter=4),
         subtit  =P("s",  fontSize=11,textColor=CZ,alignment=TA_CENTER,spaceAfter=4),
@@ -346,16 +357,21 @@ def build_pdf(nome,dias_rows,conn,user_id):
 @app.route("/api/exportar-pdf", methods=["POST"])
 @login_required
 def exportar_pdf():
-    body=request.json; di=body.get("data_inicio"); df=body.get("data_fim")
-    nome=(body.get("nome_paciente") or session.get("usuario_nome","Paciente")).strip()
-    conn=get_db(); params=[uid()]
-    query="SELECT DISTINCT data FROM refeicoes WHERE usuario_id=?"
-    if di and df: query+=" AND data BETWEEN ? AND ?"; params+=[di,df]
-    query+=" ORDER BY data"
-    dias=conn.execute(query,params).fetchall()
-    buf=build_pdf(nome,dias,conn,uid()); conn.close()
-    safe=nome.replace(" ","_").replace("/","_")
-    return send_file(buf,as_attachment=True,download_name=f"diario_alimentar_{safe}.pdf",mimetype="application/pdf")
+    try:
+        body=request.json; di=body.get("data_inicio"); df=body.get("data_fim")
+        nome=(body.get("nome_paciente") or session.get("usuario_nome","Paciente")).strip()
+        conn=get_db(); params=[uid()]
+        query="SELECT DISTINCT data FROM refeicoes WHERE usuario_id=?"
+        if di and df: query+=" AND data BETWEEN ? AND ?"; params+=[di,df]
+        query+=" ORDER BY data"
+        dias=conn.execute(query,params).fetchall()
+        buf=build_pdf(nome,dias,conn,uid()); conn.close()
+        safe=nome.replace(" ","_").replace("/","_")
+        return send_file(buf,as_attachment=True,download_name=f"diario_alimentar_{safe}.pdf",mimetype="application/pdf")
+    except Exception as e:
+        import traceback
+        print("[PDF ERROR]", traceback.format_exc())
+        return jsonify({"erro": str(e)}), 500
 
 if __name__=="__main__":
     port=int(os.environ.get("PORT",5000))

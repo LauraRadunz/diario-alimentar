@@ -35,7 +35,10 @@
       </div>
       <div class="auth-campo">
         <label>Senha <span style="font-weight:400;color:#aaa">(mín. 6 caracteres)</span></label>
-        <input type="password" id="senha" placeholder="••••••••" autocomplete="new-password"/>
+        <div class="senha-wrap">
+          <input type="password" id="senha" placeholder="••••••••" autocomplete="new-password"/>
+          <button type="button" class="btn-olho" id="olhoSenha" tabindex="-1">👁️</button>
+        </div>
       </div>
       <button class="auth-btn" id="btnCadastro">Solicitar acesso</button>
     </div>
@@ -53,6 +56,16 @@
     <a href="/login" class="auth-btn" style="display:block;margin-top:24px;text-decoration:none;text-align:center">Voltar ao login</a>
   </div>
 
+  <style>
+    .senha-wrap { position: relative; }
+    .senha-wrap input { padding-right: 42px !important; }
+    .btn-olho {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 0;
+      color: #aaa; font-size: 18px; line-height: 1; display: flex; align-items: center;
+    }
+    .btn-olho:hover { color: var(--verde-medio); }
+  </style>
   <script>
     const btn  = document.getElementById('btnCadastro');
     const erro = document.getElementById('auth-erro');
@@ -79,6 +92,10 @@
     });
 
     function show(msg) { erro.textContent = msg; erro.style.display = 'block'; }
+    document.getElementById('olhoSenha').addEventListener('click', () => {
+      const inp = document.getElementById('senha');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
   </script>
 </body>
 </html>
