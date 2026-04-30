@@ -350,18 +350,18 @@ body {
 }
 
 .btn-deletar {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: none;
   border: none;
-  font-size: 16px;
+  font-size: 15px;
   color: #ccc;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 4px 6px;
   border-radius: 6px;
-  transition: color 0.15s;
+  transition: color 0.15s, background 0.15s;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
