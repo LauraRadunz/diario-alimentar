@@ -5,7 +5,7 @@ const UNIDADES = [
   "colher de chá","colher de sopa","colher de sobremesa","colher grande",
   "xícara","xícara de chá","xícara de café","copo","copo americano",
   "fatia","pedaço","porção","punhado","lata","caixinha","sachê",
-  "tablete","barra","pacote",
+  "tablete","barra","pacote","pão francês",
 ];
 
 // ── Estado ─────────────────────────────────────────────────────────────────────
@@ -15,10 +15,13 @@ let anoAtual = new Date().getFullYear();
 let diasComRegistro = new Set();
 let modalTipo    = "refeicao";
 let modalPeriodo = "manha";
-let editandoId   = null;   // null = novo, número = edição
+let editandoId   = null;
+
+// Para o modal de ingredientes
+let ingredientesCallback = null;
 
 // ── Utils ──────────────────────────────────────────────────────────────────────
-const hojeISO = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const hojeISO   = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const horaAtual = () => { const d=new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const pad = n => String(n).padStart(2,'0');
 
@@ -87,9 +90,47 @@ async function selecionarDia(iso) {
   dataSelecionada=iso; renderCalendario();
   document.getElementById('diaTitulo').textContent=formatarData(iso);
   document.getElementById('diaSub').textContent='';
+  document.getElementById('obsDiaWrap').style.display='block';
+  await carregarObs();
   await carregarRefeicoes();
 }
 
+// ── Observação do dia ─────────────────────────────────────────────────────────
+let obsAberta = false;
+
+document.getElementById('btnObsToggle').addEventListener('click', () => {
+  obsAberta = !obsAberta;
+  document.getElementById('obsDiaBody').style.display = obsAberta ? 'block' : 'none';
+  document.getElementById('btnObsToggle').textContent = obsAberta ? '▴' : '▾';
+});
+
+async function carregarObs() {
+  if (!dataSelecionada) return;
+  try {
+    const r = await fetch(`/api/obs/${dataSelecionada}`);
+    const d = await r.json();
+    document.getElementById('obsTexto').value = d.obs || '';
+    // Se há obs salva, mostra indicador visual
+    const bar = document.querySelector('.obs-dia-bar');
+    bar.classList.toggle('tem-obs', !!(d.obs && d.obs.trim()));
+  } catch {}
+}
+
+document.getElementById('btnSalvarObs').addEventListener('click', async () => {
+  if (!dataSelecionada) return;
+  const obs = document.getElementById('obsTexto').value.trim();
+  try {
+    await fetch(`/api/obs/${dataSelecionada}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({obs})
+    });
+    const bar = document.querySelector('.obs-dia-bar');
+    bar.classList.toggle('tem-obs', !!obs);
+    toast('📝 Observação salva!');
+  } catch { toast('Erro ao salvar observação.'); }
+});
+
+// ── Refeições ─────────────────────────────────────────────────────────────────
 async function carregarRefeicoes() {
   if (!dataSelecionada) return;
   try {
@@ -99,20 +140,28 @@ async function carregarRefeicoes() {
   } catch { toast('Erro ao carregar.'); }
 }
 
+function tipoInfo(tipo) {
+  if (tipo === 'refeicao') return { emoji:'🍽️', label:'Refeição', cls:'tipo-refeicao' };
+  if (tipo === 'lanche')   return { emoji:'🥪', label:'Lanche',   cls:'tipo-lanche' };
+  if (tipo === 'belisco')  return { emoji:'🍬', label:'Belisco',  cls:'tipo-belisco' };
+  return { emoji:'🍽️', label:'Refeição', cls:'tipo-refeicao' };
+}
+
 function renderPeriodo(periodo, refeicoes) {
   const c=document.getElementById(`entradas-${periodo}`); c.innerHTML='';
   if (!refeicoes.length) { c.innerHTML='<div class="vazio-msg">Nenhum registro ainda</div>'; return; }
   refeicoes.forEach(r=>{
     const card=document.createElement('div');
-    card.className=`entrada-card tipo-${r.tipo}`;
-    const badge=r.tipo==='refeicao'?'🍽️ Refeição':'🍬 Lanche';
+    const info = tipoInfo(r.tipo);
+    card.className=`entrada-card ${info.cls}`;
     let alsHTML='';
     r.alimentos.forEach(a=>{
-      const med=(a.quantidade||a.unidade)?`<span class="alimento-medida">${a.quantidade||''} ${a.unidade||''}</span>`:'';
-      alsHTML+=`<div class="alimento-item">${a.nome} ${med}</div>`;
+      const med=(a.quantidade||a.unidade)?`<span class="alimento-medida">${(a.quantidade||'').trim()} ${(a.unidade||'').trim()}</span>`:'';
+      const ingHTML = a.ingredientes ? `<div class="alimento-ingredientes">↳ ${a.ingredientes}</div>` : '';
+      alsHTML+=`<div class="alimento-item">${a.nome} ${med}</div>${ingHTML}`;
     });
     card.innerHTML=`
-      <div class="entrada-horario"><span class="badge">${badge}</span> ${r.horario}</div>
+      <div class="entrada-horario"><span class="badge">${info.emoji} ${info.label}</span> ${r.horario}</div>
       <div class="entrada-alimentos">${alsHTML}</div>
       <div class="entrada-btns">
         <button class="btn-editar" data-id="${r.id}" title="Editar">✏️</button>
@@ -129,44 +178,75 @@ function renderPeriodo(periodo, refeicoes) {
   });
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// ── Preenchimento de select de unidade ────────────────────────────────────────
 function preencherSelectUnidade(sel, valor='') {
   sel.innerHTML='';
   UNIDADES.forEach(u=>{ const o=document.createElement('option'); o.value=u; o.textContent=u||'— unidade —'; sel.appendChild(o); });
   sel.value=valor;
 }
 
-// Preenche o select do lanche na carga inicial
-preencherSelectUnidade(document.getElementById('lancheUnidade'));
+// ── Modal de ingredientes ─────────────────────────────────────────────────────
+function abrirModalIngredientes(valorAtual, callback) {
+  document.getElementById('inputIngredientes').value = valorAtual || '';
+  ingredientesCallback = callback;
+  document.getElementById('modalIngredientes').classList.add('aberto');
+}
+
+document.getElementById('fecharModalIngredientes').addEventListener('click', () => {
+  document.getElementById('modalIngredientes').classList.remove('aberto');
+  ingredientesCallback = null;
+});
+document.getElementById('btnCancelarIngredientes').addEventListener('click', () => {
+  document.getElementById('modalIngredientes').classList.remove('aberto');
+  ingredientesCallback = null;
+});
+document.getElementById('btnSalvarIngredientes').addEventListener('click', () => {
+  const val = document.getElementById('inputIngredientes').value.trim();
+  if (ingredientesCallback) ingredientesCallback(val);
+  document.getElementById('modalIngredientes').classList.remove('aberto');
+  ingredientesCallback = null;
+});
+document.getElementById('modalIngredientes').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('modalIngredientes').classList.remove('aberto');
+    ingredientesCallback = null;
+  }
+});
+
+// ── Modal principal ───────────────────────────────────────────────────────────
+function labelModal(tipo) {
+  if (tipo === 'refeicao') return '🍽️ Nova Refeição';
+  if (tipo === 'lanche')   return '🥪 Novo Lanche';
+  if (tipo === 'belisco')  return '🍬 Novo Belisco';
+  return '🍽️ Nova Refeição';
+}
+function labelAlimentos(tipo) {
+  if (tipo === 'refeicao') return 'Alimentos <span style="font-size:11px;color:#aaa;font-weight:400">(segure e arraste para reordenar)</span>';
+  if (tipo === 'lanche')   return 'O que você comeu/bebeu?';
+  if (tipo === 'belisco')  return 'O que você beliscou?';
+  return 'Alimentos';
+}
 
 function abrirModal(tipo, periodo) {
   if (!dataSelecionada) { toast('Selecione um dia primeiro!'); return; }
   editandoId=null; modalTipo=tipo; modalPeriodo=periodo;
-  document.getElementById('modalTitulo').textContent = tipo==='refeicao'?'🍽️ Nova Refeição':'🍬 Lanche Rápido';
+  document.getElementById('modalTitulo').textContent = labelModal(tipo);
+  document.getElementById('labelAlimentos').innerHTML = labelAlimentos(tipo);
   document.getElementById('inputHorario').value=horaAtual();
-  document.getElementById('camposRefeicao').style.display=tipo==='refeicao'?'block':'none';
-  document.getElementById('campoLanche').style.display=tipo==='lanche'?'block':'none';
-  if (tipo==='refeicao') { document.getElementById('listaAlimentos').innerHTML=''; adicionarLinhaAlimento(); }
-  else { document.getElementById('lancheName').value=''; document.getElementById('lancheQtd').value=''; document.getElementById('lancheUnidade').value=''; }
+  document.getElementById('listaAlimentos').innerHTML='';
+  adicionarLinhaAlimento();
   document.getElementById('modalRefeicao').classList.add('aberto');
 }
 
 function abrirEdicao(r) {
   editandoId=r.id; modalTipo=r.tipo; modalPeriodo=r.periodo;
-  document.getElementById('modalTitulo').textContent = r.tipo==='refeicao'?'✏️ Editar Refeição':'✏️ Editar Lanche';
+  const prefixo = r.tipo==='refeicao'?'✏️ Editar Refeição': r.tipo==='lanche'?'✏️ Editar Lanche':'✏️ Editar Belisco';
+  document.getElementById('modalTitulo').textContent = prefixo;
+  document.getElementById('labelAlimentos').innerHTML = labelAlimentos(r.tipo);
   document.getElementById('inputHorario').value=r.horario;
-  document.getElementById('camposRefeicao').style.display=r.tipo==='refeicao'?'block':'none';
-  document.getElementById('campoLanche').style.display=r.tipo==='lanche'?'block':'none';
-  if (r.tipo==='refeicao') {
-    document.getElementById('listaAlimentos').innerHTML='';
-    r.alimentos.forEach(a=>adicionarLinhaAlimento(a.nome, a.quantidade, a.unidade));
-    if (!r.alimentos.length) adicionarLinhaAlimento();
-  } else {
-    const a=r.alimentos[0]||{};
-    document.getElementById('lancheName').value=a.nome||'';
-    document.getElementById('lancheQtd').value=a.quantidade||'';
-    preencherSelectUnidade(document.getElementById('lancheUnidade'), a.unidade||'');
-  }
+  document.getElementById('listaAlimentos').innerHTML='';
+  r.alimentos.forEach(a=>adicionarLinhaAlimento(a.nome, a.quantidade, a.unidade, a.ingredientes||''));
+  if (!r.alimentos.length) adicionarLinhaAlimento();
   document.getElementById('modalRefeicao').classList.add('aberto');
 }
 
@@ -179,20 +259,42 @@ document.querySelectorAll('.btn-add-tipo').forEach(b=>b.addEventListener('click'
 // ── Linhas alimento com drag & drop ───────────────────────────────────────────
 let dragSrc = null;
 
-function adicionarLinhaAlimento(nome='', qtd='', unidade='') {
+function adicionarLinhaAlimento(nome='', qtd='', unidade='', ingredientes='') {
   const lista=document.getElementById('listaAlimentos');
   const wrap=document.createElement('div');
   wrap.className='alimento-row-wrap'; wrap.draggable=true;
+  wrap._ingredientes = ingredientes; // guarda no elemento
 
   const handle=document.createElement('span'); handle.className='drag-handle'; handle.innerHTML='⠿'; handle.title='Arrastar para reordenar';
   const input=document.createElement('input'); input.type='text'; input.className='input-alimento'; input.placeholder='Nome do alimento...'; input.value=nome;
+
   const btnRem=document.createElement('button'); btnRem.className='btn-remover-alimento'; btnRem.textContent='✕';
-  btnRem.addEventListener('click',()=>{ if(lista.children.length>1) wrap.remove(); else toast('Precisa ter ao menos um alimento.'); });
+  btnRem.addEventListener('click',()=>{ if(lista.children.length>1) wrap.remove(); else toast('Precisa ter ao menos um item.'); });
+
+  // Botão de ingredientes
+  const btnIng=document.createElement('button'); btnIng.className='btn-ingredientes'; btnIng.title='Detalhar ingredientes';
+  btnIng.innerHTML='🧂';
+  btnIng.classList.toggle('tem-ingredientes', !!(ingredientes && ingredientes.trim()));
+  btnIng.addEventListener('click', ()=>{
+    abrirModalIngredientes(wrap._ingredientes, (val)=>{
+      wrap._ingredientes = val;
+      btnIng.classList.toggle('tem-ingredientes', !!val);
+      btnIng.title = val ? `Ingredientes: ${val}` : 'Detalhar ingredientes';
+    });
+  });
+
   const medRow=document.createElement('div'); medRow.className='alimento-medida-row';
   const inputQtd=document.createElement('input'); inputQtd.type='text'; inputQtd.className='input-qtd'; inputQtd.placeholder='Qtd'; inputQtd.inputMode='decimal'; inputQtd.value=qtd;
   const sel=document.createElement('select'); sel.className='select-unidade'; preencherSelectUnidade(sel, unidade);
+
+  const acoesTopo = document.createElement('div'); acoesTopo.className='alimento-acoes-topo';
+  acoesTopo.appendChild(handle);
+  acoesTopo.appendChild(input);
+  acoesTopo.appendChild(btnIng);
+  acoesTopo.appendChild(btnRem);
+
   medRow.appendChild(inputQtd); medRow.appendChild(sel);
-  wrap.appendChild(handle); wrap.appendChild(input); wrap.appendChild(btnRem); wrap.appendChild(medRow);
+  wrap.appendChild(acoesTopo); wrap.appendChild(medRow);
   lista.appendChild(wrap);
 
   // Drag events
@@ -217,20 +319,17 @@ document.getElementById('btnAddAlimento').addEventListener('click',()=>adicionar
 document.getElementById('btnSalvar').addEventListener('click', async()=>{
   const horario=document.getElementById('inputHorario').value;
   if (!horario) { toast('Informe o horário.'); return; }
+
   let alimentos=[];
-  if (modalTipo==='refeicao') {
-    document.querySelectorAll('#listaAlimentos .alimento-row-wrap').forEach(l=>{
-      const nome=l.querySelector('.input-alimento').value.trim();
-      const qtd =l.querySelector('.input-qtd').value.trim();
-      const und =l.querySelector('.select-unidade').value;
-      if (nome) alimentos.push({nome,quantidade:qtd,unidade:und});
-    });
-    if (!alimentos.length) { toast('Adicione ao menos um alimento.'); return; }
-  } else {
-    const nome=document.getElementById('lancheName').value.trim();
-    if (!nome) { toast('Descreva o que comeu/bebeu.'); return; }
-    alimentos.push({nome,quantidade:document.getElementById('lancheQtd').value.trim(),unidade:document.getElementById('lancheUnidade').value});
-  }
+  document.querySelectorAll('#listaAlimentos .alimento-row-wrap').forEach(l=>{
+    const nome = l.querySelector('.input-alimento').value.trim();
+    const qtd  = l.querySelector('.input-qtd').value.trim();
+    const und  = l.querySelector('.select-unidade').value;
+    const ing  = l._ingredientes || '';
+    if (nome) alimentos.push({nome, quantidade:qtd, unidade:und, ingredientes:ing});
+  });
+  if (!alimentos.length) { toast('Adicione ao menos um item.'); return; }
+
   const payload={data:dataSelecionada,periodo:modalPeriodo,horario,tipo:modalTipo,alimentos};
   const url  = editandoId ? `/api/refeicoes/${editandoId}` : '/api/refeicoes';
   const meth = editandoId ? 'PUT' : 'POST';

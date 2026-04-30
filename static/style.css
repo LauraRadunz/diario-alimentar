@@ -9,6 +9,9 @@
   --verde-bg: #F0F7E8;
   --amarelo-lanche: #F5C842;
   --amarelo-lanche-bg: #FFF8DC;
+  --roxo-belisco: #6B3FA0;
+  --roxo-belisco-bg: #F3EEFF;
+  --roxo-belisco-borda: #D8C5F5;
   --branco: #FFFFFF;
   --cinza-leve: #F7F7F5;
   --cinza-borda: #E2E8DA;
@@ -48,14 +51,8 @@ body {
   justify-content: space-between;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+.logo { display: flex; align-items: center; gap: 8px; }
 .logo-leaf { font-size: 22px; }
-
 .logo-text {
   font-family: 'Lora', serif;
   font-size: 18px;
@@ -78,8 +75,8 @@ body {
   border-radius: 20px;
   cursor: pointer;
   transition: background 0.2s;
+  text-decoration: none;
 }
-
 .btn-pdf:hover { background: rgba(255,255,255,0.22); }
 
 /* ===== CALENDÁRIO ===== */
@@ -110,7 +107,6 @@ body {
   line-height: 1;
   transition: color 0.15s;
 }
-
 .cal-nav:hover { color: var(--verde-escuro); }
 
 .cal-mes-ano {
@@ -127,7 +123,6 @@ body {
   text-align: center;
   margin-bottom: 6px;
 }
-
 .cal-dias-semana span {
   font-size: 11px;
   font-weight: 600;
@@ -163,18 +158,8 @@ body {
 }
 
 .cal-dia.outro-mes { color: #ccc; cursor: default; }
-
-.cal-dia.hoje {
-  border: 2px solid var(--verde-claro);
-  color: var(--verde-escuro);
-  font-weight: 700;
-}
-
-.cal-dia.selecionado {
-  background: var(--verde-medio) !important;
-  color: #fff !important;
-  font-weight: 700;
-}
+.cal-dia.hoje { border: 2px solid var(--verde-claro); color: var(--verde-escuro); font-weight: 700; }
+.cal-dia.selecionado { background: var(--verde-medio) !important; color: #fff !important; font-weight: 700; }
 
 .cal-dia.tem-registro::after {
   content: '';
@@ -185,7 +170,6 @@ body {
   border-radius: 50%;
   background: var(--verde-claro);
 }
-
 .cal-dia.selecionado::after { background: rgba(255,255,255,0.7); }
 
 /* ===== MAIN ===== */
@@ -197,7 +181,7 @@ body {
 
 .dia-titulo-wrap {
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .dia-titulo {
@@ -215,6 +199,84 @@ body {
   margin-top: 2px;
 }
 
+/* ===== OBSERVAÇÃO DO DIA ===== */
+.obs-dia-wrap {
+  background: var(--branco);
+  border: 1.5px solid var(--cinza-borda);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(45,80,22,0.06);
+}
+
+.obs-dia-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.obs-dia-bar:hover { background: var(--cinza-leve); }
+.obs-dia-bar.tem-obs { border-left: 3px solid var(--verde-claro); }
+
+.obs-dia-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cinza-texto);
+}
+.obs-dia-bar.tem-obs .obs-dia-label { color: var(--verde-medio); font-weight: 600; }
+
+.obs-dia-toggle {
+  background: none;
+  border: none;
+  color: var(--cinza-texto);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.obs-dia-body {
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--cinza-borda);
+}
+
+.obs-dia-textarea {
+  width: 100%;
+  border: 1.5px solid var(--cinza-borda);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #333;
+  resize: vertical;
+  outline: none;
+  background: var(--cinza-leve);
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+.obs-dia-textarea:focus { border-color: var(--verde-claro); background: #fff; }
+
+.obs-dia-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.obs-salvar-btn {
+  padding: 7px 18px;
+  background: var(--verde-medio);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.obs-salvar-btn:hover { background: var(--verde-escuro); }
+
 /* ===== PERÍODOS ===== */
 .periodos { display: flex; flex-direction: column; gap: 14px; }
 
@@ -230,9 +292,10 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 12px;
   background: var(--cinza-leve);
   border-bottom: 1px solid var(--cinza-borda);
+  flex-wrap: wrap;
 }
 
 .periodo-icon { font-size: 18px; }
@@ -247,14 +310,15 @@ body {
 
 .periodo-actions {
   display: flex;
-  gap: 6px;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
 .btn-add-tipo {
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 5px 10px;
+  padding: 4px 9px;
   border-radius: 20px;
   border: 1.5px solid var(--verde-medio);
   background: var(--branco);
@@ -263,21 +327,13 @@ body {
   transition: all 0.15s;
   white-space: nowrap;
 }
+.btn-add-tipo:hover { background: var(--verde-medio); color: #fff; }
 
-.btn-add-tipo:hover {
-  background: var(--verde-medio);
-  color: #fff;
-}
+.btn-lanche { border-color: #C8960A; color: #8B6914; }
+.btn-lanche:hover { background: #C8960A; color: #fff; }
 
-.btn-lanche {
-  border-color: #C8960A;
-  color: #8B6914;
-}
-
-.btn-lanche:hover {
-  background: #C8960A;
-  color: #fff;
-}
+.btn-belisco { border-color: var(--roxo-belisco); color: var(--roxo-belisco); }
+.btn-belisco:hover { background: var(--roxo-belisco); color: #fff; }
 
 .periodo-entradas {
   padding: 10px 14px;
@@ -294,15 +350,9 @@ body {
   position: relative;
 }
 
-.entrada-card.tipo-refeicao {
-  background: var(--verde-bg);
-  border: 1px solid var(--verde-palido);
-}
-
-.entrada-card.tipo-lanche {
-  background: var(--amarelo-lanche-bg);
-  border: 1px solid #F0D97A;
-}
+.entrada-card.tipo-refeicao { background: var(--verde-bg); border: 1px solid var(--verde-palido); }
+.entrada-card.tipo-lanche   { background: var(--amarelo-lanche-bg); border: 1px solid #F0D97A; }
+.entrada-card.tipo-belisco  { background: var(--roxo-belisco-bg); border: 1px solid var(--roxo-belisco-borda); }
 
 .entrada-horario {
   font-size: 11px;
@@ -323,10 +373,8 @@ body {
   padding: 1px 7px;
   font-size: 10px;
 }
-
-.entrada-card.tipo-lanche .entrada-horario .badge {
-  background: #8B6914;
-}
+.entrada-card.tipo-lanche .entrada-horario .badge  { background: #8B6914; }
+.entrada-card.tipo-belisco .entrada-horario .badge { background: var(--roxo-belisco); }
 
 .entrada-alimentos { margin-top: 4px; }
 
@@ -338,15 +386,19 @@ body {
   align-items: baseline;
   gap: 4px;
 }
-
 .alimento-item::before { content: '•'; color: var(--verde-claro); font-size: 16px; line-height: 1; }
+.entrada-card.tipo-lanche .alimento-item::before  { content: '🥪'; font-size: 12px; }
+.entrada-card.tipo-belisco .alimento-item::before { content: '🍬'; font-size: 12px; }
 
-.entrada-card.tipo-lanche .alimento-item::before { content: '🍬'; font-size: 12px; }
+.alimento-medida { font-size: 12px; color: var(--cinza-texto); font-weight: 500; }
 
-.alimento-medida {
-  font-size: 12px;
-  color: var(--cinza-texto);
-  font-weight: 500;
+.alimento-ingredientes {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+  padding-left: 18px;
+  margin-bottom: 2px;
+  line-height: 1.4;
 }
 
 .btn-deletar {
@@ -363,7 +415,6 @@ body {
   transition: color 0.15s;
   line-height: 1;
 }
-
 .btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
 
 /* ===== MODAL ===== */
@@ -377,16 +428,9 @@ body {
   justify-content: center;
   padding: 0;
 }
+.modal-overlay.aberto { display: flex; animation: fadeInOverlay 0.2s ease; }
 
-.modal-overlay.aberto {
-  display: flex;
-  animation: fadeInOverlay 0.2s ease;
-}
-
-@keyframes fadeInOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
 
 .modal {
   background: var(--branco);
@@ -398,10 +442,9 @@ body {
   animation: slideUp 0.28s cubic-bezier(.34,1.3,.64,1);
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
+.modal-pequeno { max-height: 60vh; }
+
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
 
 .modal-header {
   display: flex;
@@ -458,7 +501,6 @@ label, .label-alimentos {
   letter-spacing: 0.5px;
   margin-bottom: 6px;
 }
-
 .label-alimentos { margin-top: 14px; }
 
 .campo-horario { margin-bottom: 4px; }
@@ -475,7 +517,6 @@ label, .label-alimentos {
   background: var(--cinza-leve);
   transition: border-color 0.2s;
 }
-
 .input-horario:focus { border-color: var(--verde-claro); background: #fff; }
 
 /* Linha de alimento */
@@ -488,21 +529,56 @@ label, .label-alimentos {
   position: relative;
   transition: border-color 0.2s;
 }
-
 .alimento-row-wrap:focus-within { border-color: var(--verde-claro); }
 
-.input-alimento {
+.alimento-acoes-topo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   width: 100%;
+}
+
+.input-alimento {
+  flex: 1;
   border: none;
   background: transparent;
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   color: #333;
   outline: none;
-  padding: 2px 24px 2px 0;
+  padding: 2px 0;
+  min-width: 0;
 }
-
 .input-alimento::placeholder { color: #aaa; }
+
+/* Botão de ingredientes */
+.btn-ingredientes {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 3px 7px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #bbb;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.btn-ingredientes:hover { border-color: var(--verde-claro); color: var(--verde-medio); background: var(--verde-bg); }
+.btn-ingredientes.tem-ingredientes { border-color: var(--verde-medio); color: var(--verde-medio); background: var(--verde-bg); }
+
+.btn-remover-alimento {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #ccc;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+.btn-remover-alimento:hover { color: #e74c3c; }
 
 .alimento-medida-row {
   display: flex;
@@ -523,7 +599,6 @@ label, .label-alimentos {
   color: #333;
   transition: border-color 0.2s;
 }
-
 .input-qtd:focus { border-color: var(--verde-claro); }
 
 .select-unidade {
@@ -539,23 +614,7 @@ label, .label-alimentos {
   cursor: pointer;
   transition: border-color 0.2s;
 }
-
 .select-unidade:focus { border-color: var(--verde-claro); }
-
-.btn-remover-alimento {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: #ccc;
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.15s;
-}
-
-.btn-remover-alimento:hover { color: #e74c3c; }
 
 .btn-add-alimento {
   width: 100%;
@@ -571,11 +630,7 @@ label, .label-alimentos {
   margin-top: 4px;
   transition: all 0.15s;
 }
-
-.btn-add-alimento:hover {
-  border-color: var(--verde-medio);
-  background: var(--verde-bg);
-}
+.btn-add-alimento:hover { border-color: var(--verde-medio); background: var(--verde-bg); }
 
 /* Botões do modal */
 .btn-cancelar, .btn-salvar {
@@ -589,22 +644,10 @@ label, .label-alimentos {
   border: none;
   transition: all 0.15s;
 }
-
-.btn-cancelar {
-  background: var(--cinza-leve);
-  color: var(--cinza-texto);
-}
-
+.btn-cancelar { background: var(--cinza-leve); color: var(--cinza-texto); }
 .btn-cancelar:hover { background: var(--cinza-borda); }
-
-.btn-salvar {
-  background: var(--verde-medio);
-  color: #fff;
-  box-shadow: 0 3px 10px rgba(74,124,42,0.3);
-}
-
+.btn-salvar { background: var(--verde-medio); color: #fff; box-shadow: 0 3px 10px rgba(74,124,42,0.3); }
 .btn-salvar:hover { background: var(--verde-escuro); }
-
 .btn-salvar:active { transform: scale(0.98); }
 
 /* PDF obs */
@@ -620,13 +663,7 @@ label, .label-alimentos {
 }
 
 /* Vazio */
-.vazio-msg {
-  font-size: 13px;
-  color: #bbb;
-  text-align: center;
-  padding: 8px 0 4px;
-  font-style: italic;
-}
+.vazio-msg { font-size: 13px; color: #bbb; text-align: center; padding: 8px 0 4px; font-style: italic; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
@@ -650,11 +687,7 @@ label, .label-alimentos {
   opacity: 0;
   pointer-events: none;
 }
-
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
 /* ── Drag & Drop ── */
 .drag-handle {
@@ -662,11 +695,12 @@ label, .label-alimentos {
   cursor: grab;
   color: #ccc;
   font-size: 18px;
-  padding: 0 6px 0 0;
+  padding: 0 4px 0 0;
   user-select: none;
   touch-action: none;
   vertical-align: middle;
   line-height: 1;
+  flex-shrink: 0;
 }
 .drag-handle:active { cursor: grabbing; }
 .alimento-row-wrap.drag-over {

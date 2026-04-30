@@ -19,7 +19,7 @@ def init_db():
             email     TEXT NOT NULL UNIQUE,
             password  TEXT NOT NULL,
             nome      TEXT NOT NULL,
-            status    TEXT NOT NULL DEFAULT 'pendente',  -- pendente | ativo | bloqueado
+            status    TEXT NOT NULL DEFAULT 'pendente',
             is_admin  INTEGER NOT NULL DEFAULT 0,
             criado_em TEXT NOT NULL DEFAULT (datetime('now'))
         )
@@ -45,14 +45,30 @@ def init_db():
             quantidade  TEXT,
             unidade     TEXT,
             ordem       INTEGER NOT NULL DEFAULT 0,
+            ingredientes TEXT,
             FOREIGN KEY (refeicao_id) REFERENCES refeicoes(id) ON DELETE CASCADE
         )
     """)
 
-    # Migração: adiciona coluna ordem se não existir (para bancos antigos)
-    try:
-        c.execute("ALTER TABLE alimentos ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0")
-    except Exception:
-        pass
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS obs_dia (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            data       TEXT NOT NULL,
+            obs        TEXT NOT NULL DEFAULT '',
+            UNIQUE(usuario_id, data),
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        )
+    """)
+
+    # Migrações para bancos antigos
+    for col, definition in [
+        ("ordem",       "INTEGER NOT NULL DEFAULT 0"),
+        ("ingredientes","TEXT"),
+    ]:
+        try:
+            c.execute(f"ALTER TABLE alimentos ADD COLUMN {col} {definition}")
+        except Exception:
+            pass
 
     conn.commit(); conn.close()

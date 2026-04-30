@@ -46,6 +46,20 @@
       <span class="dia-sub" id="diaSub">Toque em uma data no calendário</span>
     </div>
 
+    <!-- Observação do dia -->
+    <div class="obs-dia-wrap" id="obsDiaWrap" style="display:none">
+      <div class="obs-dia-bar">
+        <span class="obs-dia-label">📝 Observações do dia</span>
+        <button class="obs-dia-toggle" id="btnObsToggle">▾</button>
+      </div>
+      <div class="obs-dia-body" id="obsDiaBody" style="display:none">
+        <textarea class="obs-dia-textarea" id="obsTexto" placeholder="Anotações livres sobre o dia, como você se sentiu, contexto das refeições..." rows="3"></textarea>
+        <div class="obs-dia-footer">
+          <button class="obs-salvar-btn" id="btnSalvarObs">Salvar</button>
+        </div>
+      </div>
+    </div>
+
     <div class="periodos" id="periodos">
       <div class="periodo-card" data-periodo="manha">
         <div class="periodo-header">
@@ -54,6 +68,7 @@
           <div class="periodo-actions">
             <button class="btn-add-tipo" data-tipo="refeicao" data-periodo="manha">+ Refeição</button>
             <button class="btn-add-tipo btn-lanche" data-tipo="lanche" data-periodo="manha">+ Lanche</button>
+            <button class="btn-add-tipo btn-belisco" data-tipo="belisco" data-periodo="manha">+ Belisco</button>
           </div>
         </div>
         <div class="periodo-entradas" id="entradas-manha"></div>
@@ -66,6 +81,7 @@
           <div class="periodo-actions">
             <button class="btn-add-tipo" data-tipo="refeicao" data-periodo="tarde">+ Refeição</button>
             <button class="btn-add-tipo btn-lanche" data-tipo="lanche" data-periodo="tarde">+ Lanche</button>
+            <button class="btn-add-tipo btn-belisco" data-tipo="belisco" data-periodo="tarde">+ Belisco</button>
           </div>
         </div>
         <div class="periodo-entradas" id="entradas-tarde"></div>
@@ -78,6 +94,7 @@
           <div class="periodo-actions">
             <button class="btn-add-tipo" data-tipo="refeicao" data-periodo="noite">+ Refeição</button>
             <button class="btn-add-tipo btn-lanche" data-tipo="lanche" data-periodo="noite">+ Lanche</button>
+            <button class="btn-add-tipo btn-belisco" data-tipo="belisco" data-periodo="noite">+ Belisco</button>
           </div>
         </div>
         <div class="periodo-entradas" id="entradas-noite"></div>
@@ -85,7 +102,7 @@
     </div>
   </main>
 
-  <!-- Modal Refeição / Edição -->
+  <!-- Modal Refeição / Lanche / Belisco / Edição -->
   <div class="modal-overlay" id="modalRefeicao">
     <div class="modal">
       <div class="modal-header">
@@ -97,25 +114,35 @@
           <label>Horário</label>
           <input type="time" id="inputHorario" class="input-horario"/>
         </div>
-        <div id="camposRefeicao">
-          <label class="label-alimentos">Alimentos <span style="font-size:11px;color:#aaa;font-weight:400">(segure e arraste para reordenar)</span></label>
+
+        <!-- Campos para refeição, lanche e belisco (todos usam multi-item agora) -->
+        <div id="camposMulti">
+          <label class="label-alimentos" id="labelAlimentos">Alimentos <span style="font-size:11px;color:#aaa;font-weight:400">(segure e arraste para reordenar)</span></label>
           <div id="listaAlimentos"></div>
-          <button class="btn-add-alimento" id="btnAddAlimento">+ Adicionar alimento</button>
-        </div>
-        <div id="campoLanche" style="display:none">
-          <label class="label-alimentos">O que você comeu/bebeu?</label>
-          <div class="alimento-row-wrap">
-            <input type="text" class="input-alimento" id="lancheName" placeholder="ex: bala de morango, suco..."/>
-          </div>
-          <div class="alimento-medida-row" style="margin-top:8px">
-            <input type="text" class="input-qtd" id="lancheQtd" placeholder="Qtd"/>
-            <select class="select-unidade" id="lancheUnidade"></select>
-          </div>
+          <button class="btn-add-alimento" id="btnAddAlimento">+ Adicionar item</button>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn-cancelar" id="btnCancelar">Cancelar</button>
         <button class="btn-salvar" id="btnSalvar">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ingredientes -->
+  <div class="modal-overlay" id="modalIngredientes">
+    <div class="modal modal-pequeno">
+      <div class="modal-header">
+        <h3 class="modal-titulo">🧂 Ingredientes / Composição</h3>
+        <button class="modal-close" id="fecharModalIngredientes">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:#888;margin-bottom:12px">Opcional. Descreva o que havia neste alimento.</p>
+        <textarea class="obs-dia-textarea" id="inputIngredientes" placeholder="ex: manteiga, leite, farinha de trigo..." rows="4"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" id="btnCancelarIngredientes">Cancelar</button>
+        <button class="btn-salvar" id="btnSalvarIngredientes">Confirmar</button>
       </div>
     </div>
   </div>
