@@ -27,7 +27,10 @@
       </div>
       <div class="auth-campo">
         <label>Senha</label>
-        <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
+        <div class="senha-wrap">
+          <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
+          <button type="button" class="btn-olho" id="olhoSenha" tabindex="-1">👁️</button>
+        </div>
       </div>
       <button class="auth-btn" id="btnLogin">Entrar</button>
     </div>
@@ -35,6 +38,16 @@
     <p class="auth-link">Não tem conta? <a href="/cadastro">Solicitar acesso</a></p>
   </div>
 
+  <style>
+    .senha-wrap { position: relative; }
+    .senha-wrap input { padding-right: 42px !important; }
+    .btn-olho {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 0;
+      color: #aaa; font-size: 18px; line-height: 1; display: flex; align-items: center;
+    }
+    .btn-olho:hover { color: var(--verde-medio); }
+  </style>
   <script>
     const btn = document.getElementById('btnLogin');
     const erro = document.getElementById('auth-erro');
@@ -61,6 +74,10 @@
     }
 
     btn.addEventListener('click', login);
+    document.getElementById('olhoSenha').addEventListener('click', () => {
+      const inp = document.getElementById('senha');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
     document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
   </script>
 </body>
