@@ -238,7 +238,7 @@ def build_pdf(nome,dias_rows,conn,user_id):
     buf=io.BytesIO()
     doc=SimpleDocTemplate(buf,pagesize=A4,rightMargin=2.2*cm,leftMargin=2.2*cm,topMargin=2*cm,bottomMargin=2.2*cm)
     s=getSampleStyleSheet()
-    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],fontName=FONT,**kw)
+    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],**{"fontName":FONT,**kw})
     st=dict(
         titulo=P("t",fontName=FONT_B,fontSize=22,textColor=VD,alignment=TA_CENTER,spaceAfter=2),
         subtit=P("s",fontSize=11,textColor=CZ,alignment=TA_CENTER,spaceAfter=2),
