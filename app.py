@@ -292,16 +292,21 @@ def build_pdf(nome,dias_rows,conn,user_id):
 @app.route("/api/exportar-pdf", methods=["POST"])
 @login_required
 def exportar_pdf():
-    body=request.json; di=body.get("data_inicio"); df=body.get("data_fim")
-    nome=(body.get("nome_paciente") or session.get("usuario_nome","Paciente")).strip()
-    conn=get_db(); params=[uid()]
-    query="SELECT DISTINCT data FROM refeicoes WHERE usuario_id=?"
-    if di and df: query+=" AND data BETWEEN ? AND ?"; params+=[di,df]
-    query+=" ORDER BY data"
-    dias=conn.execute(query,params).fetchall()
-    buf=build_pdf(nome,dias,conn,uid()); conn.close()
-    safe=nome.replace(" ","_").replace("/","_")
-    return send_file(buf,as_attachment=True,download_name=f"diario_alimentar_{safe}.pdf",mimetype="application/pdf")
+    try:
+        body=request.json; di=body.get("data_inicio"); df=body.get("data_fim")
+        nome=(body.get("nome_paciente") or session.get("usuario_nome","Paciente")).strip()
+        conn=get_db(); params=[uid()]
+        query="SELECT DISTINCT data FROM refeicoes WHERE usuario_id=?"
+        if di and df: query+=" AND data BETWEEN ? AND ?"; params+=[di,df]
+        query+=" ORDER BY data"
+        dias=conn.execute(query,params).fetchall()
+        buf=build_pdf(nome,dias,conn,uid()); conn.close()
+        safe=nome.replace(" ","_").replace("/","_")
+        return send_file(buf,as_attachment=True,download_name=f"diario_alimentar_{safe}.pdf",mimetype="application/pdf")
+    except Exception as e:
+        import traceback
+        print("[PDF ERROR]", traceback.format_exc())
+        return jsonify({"erro": str(e)}), 500
 
 if __name__=="__main__":
     port=int(os.environ.get("PORT",5000))
