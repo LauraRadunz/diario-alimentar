@@ -1,3 +1,8 @@
+"""
+Gerenciamento de usuários.
+O primeiro admin é criado pelas variáveis de ambiente ADMIN_USER / ADMIN_PASS / ADMIN_EMAIL.
+Novos usuários se cadastram pelo app e ficam com status 'pendente' até você aprovar.
+"""
 import hashlib, os
 from database import get_db, init_db
 
@@ -5,6 +10,7 @@ def _hash(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()
 
 def sincronizar_admin():
+    """Garante que o admin definido nas env vars exista e seja admin ativo."""
     init_db()
     username = os.environ.get("ADMIN_USER", "admin")
     senha    = os.environ.get("ADMIN_PASS", "admin123")
@@ -12,42 +18,21 @@ def sincronizar_admin():
     nome     = os.environ.get("ADMIN_NOME",  "Administrador")
 
     conn = get_db()
-    try:
-        existe = conn.execute(
-            "SELECT id FROM usuarios WHERE username=?", (username,)
-        ).fetchone()
-
-        if not existe:
-            # Verifica se o email já existe (pode ter sido cadastrado por outro usuário)
-            email_existe = conn.execute(
-                "SELECT id FROM usuarios WHERE email=?", (email,)
-            ).fetchone()
-
-            if email_existe:
-                # Atualiza esse usuário para ser admin
-                conn.execute(
-                    "UPDATE usuarios SET username=?, password=?, nome=?, is_admin=1, status='ativo' WHERE email=?",
-                    (username, _hash(senha), nome, email)
-                )
-                print(f"[admin] Usuário existente promovido a admin: {username}")
-            else:
-                conn.execute(
-                    "INSERT INTO usuarios (username,email,password,nome,status,is_admin) VALUES (?,?,?,?,?,?)",
-                    (username, email, _hash(senha), nome, "ativo", 1)
-                )
-                print(f"[admin] Criado: {username}")
-        else:
-            # Já existe, só atualiza senha e garante admin
-            conn.execute(
-                "UPDATE usuarios SET password=?, nome=?, is_admin=1, status='ativo' WHERE username=?",
-                (_hash(senha), nome, username)
-            )
-
-        conn.commit()
-    except Exception as e:
-        print(f"[admin] Erro ao sincronizar admin: {e}")
-    finally:
-        conn.close()
+    existe = conn.execute(
+        "SELECT id FROM usuarios WHERE username=?", (username,)
+    ).fetchone()
+    if not existe:
+        conn.execute(
+            "INSERT INTO usuarios (username,email,password,nome,status,is_admin) VALUES (?,?,?,?,?,?)",
+            (username, email, _hash(senha), nome, "ativo", 1)
+        )
+        print(f"[admin] Criado: {username}")
+    else:
+        conn.execute(
+            "UPDATE usuarios SET password=?,is_admin=1,status='ativo' WHERE username=?",
+            (_hash(senha), username)
+        )
+    conn.commit(); conn.close()
 
 def verificar_login(username: str, senha: str):
     conn  = get_db()
@@ -83,5 +68,4 @@ def listar_usuarios():
 def atualizar_status(uid, status):
     conn = get_db()
     conn.execute("UPDATE usuarios SET status=? WHERE id=?", (status, uid))
-    conn.commit()
-    conn.close()
+    conn.commit(); conn.close()
