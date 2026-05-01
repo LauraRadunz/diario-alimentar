@@ -79,6 +79,22 @@ body {
 }
 .btn-pdf:hover { background: rgba(255,255,255,0.22); }
 
+/* Header em mobile: esconde nome e compacta botões */
+@media (max-width: 480px) {
+  #nomeUsuario { display: none !important; }
+
+  .btn-pdf {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .header-inner {
+    gap: 6px;
+    padding: 12px 12px;
+  }
+}
+
 /* ===== CALENDÁRIO ===== */
 .calendario-wrapper {
   max-width: 520px;
