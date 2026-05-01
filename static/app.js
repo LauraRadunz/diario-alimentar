@@ -453,6 +453,87 @@ document.getElementById('btnConfirmarCopiar').addEventListener('click', async ()
   finally { btn.textContent = 'Copiar'; btn.disabled = false; }
 });
 
+// ── Modal Busca por Alimento ──────────────────────────────────────────────────
+document.getElementById('btnBuscar').addEventListener('click', () => {
+  document.getElementById('modalBusca').classList.add('aberto');
+  setTimeout(() => document.getElementById('buscaInput').focus(), 100);
+});
+
+function fecharModalBusca() {
+  document.getElementById('modalBusca').classList.remove('aberto');
+  document.getElementById('buscaInput').value = '';
+  document.getElementById('buscaResultados').innerHTML = '';
+}
+
+document.getElementById('fecharModalBusca').addEventListener('click', fecharModalBusca);
+document.getElementById('modalBusca').addEventListener('click', e => {
+  if (e.target === e.currentTarget) fecharModalBusca();
+});
+
+let buscaTimer = null;
+document.getElementById('buscaInput').addEventListener('input', e => {
+  clearTimeout(buscaTimer);
+  const q = e.target.value.trim();
+  const el = document.getElementById('buscaResultados');
+  if (q.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="busca-loading">Buscando...</div>';
+  buscaTimer = setTimeout(() => executarBusca(q), 350);
+});
+
+async function executarBusca(q) {
+  const el = document.getElementById('buscaResultados');
+  try {
+    const r = await fetch(`/api/buscar-alimento?q=${encodeURIComponent(q)}`);
+    const dados = await r.json();
+
+    if (!dados.length) {
+      el.innerHTML = '<div class="busca-vazio">Nenhum registro encontrado.</div>';
+      return;
+    }
+
+    // Agrupa por data
+    const porData = {};
+    dados.forEach(d => {
+      if (!porData[d.data]) porData[d.data] = [];
+      porData[d.data].push(d);
+    });
+
+    const periodoLabel = { manha: '☀️ Manhã', tarde: '🌤️ Tarde', noite: '🌙 Noite' };
+    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+    let html = '';
+    Object.keys(porData).sort((a,b) => b.localeCompare(a)).forEach(data => {
+      const [ano, mes, dia] = data.split('-');
+      const dataFmt = `${dia} de ${meses[Number(mes)-1]} de ${ano}`;
+      html += `<div class="busca-grupo">
+        <button class="busca-data-btn" onclick="irParaDia('${data}')">${dataFmt}</button>
+        <div class="busca-ocorrencias">`;
+      porData[data].forEach(item => {
+        const med = (item.quantidade || item.unidade)
+          ? ` <span class="busca-med">${(item.quantidade||'').trim()} ${(item.unidade||'').trim()}</span>` : '';
+        html += `<div class="busca-item">
+          <span class="busca-periodo">${periodoLabel[item.periodo] || item.periodo}</span>
+          <span class="busca-nome">${item.alimento}${med}</span>
+          <span class="busca-hora">${item.horario}</span>
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+
+    el.innerHTML = html;
+  } catch { el.innerHTML = '<div class="busca-vazio">Erro ao buscar.</div>'; }
+}
+
+function irParaDia(iso) {
+  fecharModalBusca();
+  // Navega o calendário para o mês certo e seleciona o dia
+  const [a, m] = iso.split('-').map(Number);
+  mesAtual = m - 1;
+  anoAtual = a;
+  selecionarDia(iso);
+  renderCalendario();
+}
+
 // ── Modal PDF ─────────────────────────────────────────────────────────────────
 document.getElementById('btnExportarPDF').addEventListener('click',()=>document.getElementById('modalPDF').classList.add('aberto'));
 document.getElementById('fecharModalPDF').addEventListener('click',()=>document.getElementById('modalPDF').classList.remove('aberto'));

@@ -803,3 +803,61 @@ label, .label-alimentos {
 }
 
 .confirm-btn-cancel:hover, .confirm-btn-ok:hover { opacity: 0.82; }
+
+/* ── Busca por alimento ── */
+.busca-input-wrap { margin-bottom: 14px; }
+
+.busca-resultados {
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.busca-loading, .busca-vazio {
+  text-align: center;
+  color: #bbb;
+  font-size: 13px;
+  padding: 24px 0;
+  font-style: italic;
+}
+
+.busca-grupo { margin-bottom: 14px; }
+
+.busca-data-btn {
+  background: var(--verde-bg);
+  border: none;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--verde-escuro);
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: background 0.15s;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+.busca-data-btn:hover { background: #c8e6a0; }
+
+.busca-ocorrencias {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 8px;
+}
+
+.busca-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--cinza-leve);
+}
+
+.busca-periodo { font-size: 12px; flex-shrink: 0; }
+.busca-nome    { flex: 1; color: #333; font-weight: 500; }
+.busca-hora    { font-size: 11px; color: #aaa; flex-shrink: 0; }
+.busca-med     { font-weight: 400; color: #888; font-size: 12px; }

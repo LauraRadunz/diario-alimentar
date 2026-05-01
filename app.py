@@ -147,6 +147,25 @@ def api_admin_status(uid_alvo):
     return jsonify({"sucesso":True})
 
 # ── Refeições API ──────────────────────────────────────────────────────────────
+@app.route("/api/buscar-alimento")
+@login_required
+def buscar_alimento():
+    q = request.args.get("q", "").strip()
+    if not q or len(q) < 2:
+        return jsonify([])
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT DISTINCT r.data, r.periodo, r.horario, r.tipo,
+               a.nome as alimento, a.quantidade, a.unidade
+        FROM alimentos a
+        JOIN refeicoes r ON r.id = a.refeicao_id
+        WHERE r.usuario_id = ? AND a.nome LIKE ?
+        ORDER BY r.data DESC, r.horario
+        LIMIT 60
+    """, (uid(), f"%{q}%")).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
 @app.route("/api/refeicoes/<data>")
 @login_required
 def get_refeicoes(data):

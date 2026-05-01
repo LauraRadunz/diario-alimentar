@@ -25,6 +25,10 @@
       <div style="display:flex;gap:8px;align-items:center">
         <span id="nomeUsuario" style="font-size:13px;color:rgba(255,255,255,0.7)"></span>
         <a id="linkAdmin" href="/admin" class="btn-pdf" style="display:none">Admin</a>
+        <button class="btn-pdf" id="btnBuscar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Buscar
+        </button>
         <button class="btn-pdf" id="btnExportarPDF">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
           PDF
@@ -179,6 +183,24 @@
       <div class="modal-footer">
         <button class="btn-cancelar" id="btnCancelarPDF">Cancelar</button>
         <button class="btn-salvar" id="btnGerarPDF">Gerar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Busca por Alimento -->
+  <div class="modal-overlay" id="modalBusca">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-titulo">🔍 Buscar alimento</h3>
+        <button class="modal-close" id="fecharModalBusca">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="busca-input-wrap">
+          <input type="text" id="buscaInput" class="input-horario"
+                 placeholder="Ex: frango, arroz, iogurte..."
+                 autocomplete="off" autocapitalize="none"/>
+        </div>
+        <div id="buscaResultados" class="busca-resultados"></div>
       </div>
     </div>
   </div>
