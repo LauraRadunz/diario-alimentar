@@ -412,3 +412,11 @@ document.getElementById('btnGerarPDF').addEventListener('click',async()=>{
   renderCalendario();
   await selecionarDia(hojeISO());
 })();
+
+// ── PWA — Registro do Service Worker ──────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .catch(err => console.warn('SW não registrado:', err));
+  });
+}
