@@ -401,21 +401,7 @@ body {
   line-height: 1.4;
 }
 
-.btn-deletar {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 16px;
-  color: #ccc;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 6px;
-  transition: color 0.15s;
-  line-height: 1;
-}
-.btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
+
 
 /* ===== MODAL ===== */
 .modal-overlay {
@@ -729,20 +715,24 @@ label, .label-alimentos {
   top: 8px;
   right: 8px;
   display: flex;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
 }
-.btn-editar {
+.btn-editar,
+.btn-deletar {
   background: none;
   border: none;
-  font-size: 14px;
-  color: #aaa;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 3px 5px;
   border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
   line-height: 1;
+  transition: color 0.15s, background 0.15s;
 }
-.btn-editar:hover { color: var(--verde-medio); background: var(--verde-bg); }
+.btn-editar  { font-size: 13px; color: #aaa; }
+.btn-deletar { font-size: 15px; color: #ccc; }
+.btn-editar:hover  { color: var(--verde-medio); background: var(--verde-bg); }
+.btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
 /* ── Modal de confirmação ── */
 .confirm-overlay {
   display: none;
