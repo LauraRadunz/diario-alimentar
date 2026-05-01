@@ -40,6 +40,50 @@ function toast(msg) {
   clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 2500);
 }
 
+// ── Modal de confirmação ───────────────────────────────────────────────────────
+function confirmar(msg, opcoes = {}) {
+  return new Promise(resolve => {
+    const { txtOk = 'Remover', txtCancelar = 'Cancelar', perigo = true } = opcoes;
+    let overlay = document.getElementById('_modalConfirm');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = '_modalConfirm';
+      overlay.className = 'confirm-overlay';
+      overlay.innerHTML = `
+        <div class="confirm-box">
+          <p class="confirm-msg" id="_confirmMsg"></p>
+          <div class="confirm-btns">
+            <button class="confirm-btn-cancel" id="_confirmCancel"></button>
+            <button class="confirm-btn-ok" id="_confirmOk"></button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+    const box     = overlay.querySelector('.confirm-box');
+    const msgEl   = overlay.querySelector('#_confirmMsg');
+    const btnOk   = overlay.querySelector('#_confirmOk');
+    const btnCanc = overlay.querySelector('#_confirmCancel');
+
+    msgEl.textContent    = msg;
+    btnOk.textContent    = txtOk;
+    btnCanc.textContent  = txtCancelar;
+    btnOk.className      = perigo ? 'confirm-btn-ok perigo' : 'confirm-btn-ok';
+
+    overlay.classList.add('aberto');
+
+    const cleanup = (val) => {
+      overlay.classList.remove('aberto');
+      btnOk.replaceWith(btnOk.cloneNode(true));
+      btnCanc.replaceWith(btnCanc.cloneNode(true));
+      resolve(val);
+    };
+
+    overlay.querySelector('#_confirmOk').addEventListener('click',    () => cleanup(true),  { once: true });
+    overlay.querySelector('#_confirmCancel').addEventListener('click', () => cleanup(false), { once: true });
+    overlay.addEventListener('click', e => { if (e.target === overlay) cleanup(false); }, { once: true });
+  });
+}
+
 // ── Usuário ────────────────────────────────────────────────────────────────────
 async function carregarMe() {
   const r = await fetch('/api/me');
@@ -169,7 +213,8 @@ function renderPeriodo(periodo, refeicoes) {
       </div>`;
     card.querySelector('.btn-editar').addEventListener('click',()=>abrirEdicao(r));
     card.querySelector('.btn-deletar').addEventListener('click',async()=>{
-      if(!confirm('Remover este registro?')) return;
+      const ok = await confirmar('Remover este registro?', { txtOk: 'Remover', txtCancelar: 'Cancelar', perigo: true });
+      if (!ok) return;
       await fetch(`/api/refeicoes/${r.id}`,{method:'DELETE'});
       await carregarDiasComRegistro(); renderCalendario(); await carregarRefeicoes();
       toast('Removido.');

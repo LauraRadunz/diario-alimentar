@@ -402,6 +402,9 @@ body {
 }
 
 .btn-deletar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
   font-size: 16px;
@@ -740,3 +743,70 @@ label, .label-alimentos {
   line-height: 1;
 }
 .btn-editar:hover { color: var(--verde-medio); background: var(--verde-bg); }
+/* ── Modal de confirmação ── */
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.confirm-overlay.aberto { display: flex; animation: fadeInOverlay 0.18s ease; }
+
+.confirm-box {
+  background: var(--branco);
+  border-radius: 20px;
+  padding: 28px 24px 20px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+  animation: scaleIn 0.2s cubic-bezier(.34,1.4,.64,1);
+}
+
+@keyframes scaleIn { from{transform:scale(0.88);opacity:0} to{transform:scale(1);opacity:1} }
+
+.confirm-msg {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #222;
+  text-align: center;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+.confirm-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn-cancel, .confirm-btn-ok {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.confirm-btn-cancel {
+  background: var(--cinza-leve);
+  color: var(--cinza-texto);
+}
+
+.confirm-btn-ok {
+  background: var(--verde-medio);
+  color: #fff;
+}
+
+.confirm-btn-ok.perigo {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.confirm-btn-cancel:hover, .confirm-btn-ok:hover { opacity: 0.82; }
