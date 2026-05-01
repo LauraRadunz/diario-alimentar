@@ -377,7 +377,7 @@ def build_pdf(nome,dias_rows,conn,user_id):
     ))
     story.append(Spacer(1,.1*cm))
     story.append(Paragraph(
-        "Desenvolvido com carinho por Laura Radünz Pedro — porque registrar o que se come também é um ato de cuidado.",
+        "Desenvolvido por Laura Radünz Pedro\nlaurarp.dev@gmail.com -- ☕︎ -- @lauraradunzpedro",
         st["rodape"]
     ))
     doc.build(story); buf.seek(0); return buf
