@@ -183,6 +183,35 @@
     </div>
   </div>
 
+  <!-- Modal Copiar Refeição -->
+  <div class="modal-overlay" id="modalCopiar">
+    <div class="modal modal-pequeno">
+      <div class="modal-header">
+        <h3 class="modal-titulo">📋 Copiar refeição</h3>
+        <button class="modal-close" id="fecharModalCopiar">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:#888;margin-bottom:16px">Escolha para qual dia e período deseja copiar esta refeição.</p>
+        <div class="campo-horario">
+          <label>Data de destino</label>
+          <input type="date" id="copiarData" class="input-horario"/>
+        </div>
+        <div class="campo-horario" style="margin-top:12px">
+          <label>Período</label>
+          <select id="copiarPeriodo" class="input-horario">
+            <option value="manha">☀️ Manhã</option>
+            <option value="tarde">🌤️ Tarde</option>
+            <option value="noite">🌙 Noite</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" id="btnCancelarCopiar">Cancelar</button>
+        <button class="btn-salvar" id="btnConfirmarCopiar">Copiar</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <p>Desenvolvido por <strong>Laura Radünz Pedro</strong></p>
     <p><i>laurarp.dev@gmail.com</i></p>

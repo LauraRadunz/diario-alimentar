@@ -720,7 +720,8 @@ label, .label-alimentos {
   gap: 2px;
 }
 .btn-editar,
-.btn-deletar {
+.btn-deletar,
+.btn-copiar {
   background: none;
   border: none;
   cursor: pointer;
@@ -729,8 +730,10 @@ label, .label-alimentos {
   line-height: 1;
   transition: color 0.15s, background 0.15s;
 }
+.btn-copiar  { font-size: 13px; color: #aaa; }
 .btn-editar  { font-size: 13px; color: #aaa; }
 .btn-deletar { font-size: 15px; color: #ccc; }
+.btn-copiar:hover  { color: #3b82f6; background: #eff6ff; }
 .btn-editar:hover  { color: var(--verde-medio); background: var(--verde-bg); }
 .btn-deletar:hover { color: #e74c3c; background: #fef0f0; }
 /* ── Modal de confirmação ── */

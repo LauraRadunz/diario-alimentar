@@ -208,9 +208,11 @@ function renderPeriodo(periodo, refeicoes) {
       <div class="entrada-horario"><span class="badge">${info.emoji} ${info.label}</span> ${r.horario}</div>
       <div class="entrada-alimentos">${alsHTML}</div>
       <div class="entrada-btns">
+        <button class="btn-copiar" data-id="${r.id}" title="Copiar para outro dia">📋</button>
         <button class="btn-editar" data-id="${r.id}" title="Editar">✏️</button>
         <button class="btn-deletar" data-id="${r.id}" title="Remover">✕</button>
       </div>`;
+    card.querySelector('.btn-copiar').addEventListener('click', () => abrirModalCopiar(r));
     card.querySelector('.btn-editar').addEventListener('click',()=>abrirEdicao(r));
     card.querySelector('.btn-deletar').addEventListener('click',async()=>{
       const ok = await confirmar('Remover este registro?', { txtOk: 'Remover', txtCancelar: 'Cancelar', perigo: true });
@@ -383,6 +385,72 @@ document.getElementById('btnSalvar').addEventListener('click', async()=>{
     const j=await r.json();
     if (j.success) { fecharModal(); await carregarDiasComRegistro(); renderCalendario(); await carregarRefeicoes(); toast(editandoId?'✅ Editado!':'✅ Salvo!'); }
   } catch { toast('Erro ao salvar.'); }
+});
+
+// ── Modal Copiar Refeição ─────────────────────────────────────────────────────
+let refeicaoParaCopiar = null;
+
+function abrirModalCopiar(r) {
+  refeicaoParaCopiar = r;
+  // Data padrão: dia seguinte ao selecionado
+  const [a, m, d] = dataSelecionada.split('-').map(Number);
+  const amanha = new Date(a, m - 1, d + 1);
+  const iso = `${amanha.getFullYear()}-${pad(amanha.getMonth()+1)}-${pad(amanha.getDate())}`;
+  document.getElementById('copiarData').value = iso;
+  document.getElementById('copiarPeriodo').value = r.periodo;
+  document.getElementById('modalCopiar').classList.add('aberto');
+}
+
+function fecharModalCopiar() {
+  document.getElementById('modalCopiar').classList.remove('aberto');
+  refeicaoParaCopiar = null;
+}
+
+document.getElementById('fecharModalCopiar').addEventListener('click', fecharModalCopiar);
+document.getElementById('btnCancelarCopiar').addEventListener('click', fecharModalCopiar);
+document.getElementById('modalCopiar').addEventListener('click', e => {
+  if (e.target === e.currentTarget) fecharModalCopiar();
+});
+
+document.getElementById('btnConfirmarCopiar').addEventListener('click', async () => {
+  const data    = document.getElementById('copiarData').value;
+  const periodo = document.getElementById('copiarPeriodo').value;
+  if (!data) { toast('Escolha uma data de destino.'); return; }
+
+  const btn = document.getElementById('btnConfirmarCopiar');
+  btn.textContent = 'Copiando...'; btn.disabled = true;
+
+  try {
+    const payload = {
+      data,
+      periodo,
+      horario:  refeicaoParaCopiar.horario,
+      tipo:     refeicaoParaCopiar.tipo,
+      alimentos: refeicaoParaCopiar.alimentos.map(a => ({
+        nome:        a.nome,
+        quantidade:  a.quantidade  || '',
+        unidade:     a.unidade     || '',
+        ingredientes: a.ingredientes || '',
+      }))
+    };
+    const r = await fetch('/api/refeicoes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const j = await r.json();
+    if (j.success) {
+      fecharModalCopiar();
+      await carregarDiasComRegistro();
+      renderCalendario();
+      // Se copiou para o dia que está aberto, recarrega
+      if (data === dataSelecionada) await carregarRefeicoes();
+      toast('📋 Refeição copiada!');
+    } else {
+      toast('Erro ao copiar.');
+    }
+  } catch { toast('Erro ao copiar.'); }
+  finally { btn.textContent = 'Copiar'; btn.disabled = false; }
 });
 
 // ── Modal PDF ─────────────────────────────────────────────────────────────────
