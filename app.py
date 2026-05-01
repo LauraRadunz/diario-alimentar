@@ -79,7 +79,7 @@ def api_login():
     d    = request.json
     user = verificar_login(d.get("username","").strip(), d.get("senha",""))
     if not user:
-        return jsonify({"sucesso":False,"erro":"Usuário ou senha incorretos"}), 401
+        return jsonify({"sucesso":False,"erro":"Usuário, e-mail ou senha incorretos"}), 401
     if user["status"] == "pendente":
         return jsonify({"sucesso":False,"erro":"Seu cadastro ainda não foi aprovado. Aguarde a liberação."}), 403
     if user["status"] == "bloqueado":
@@ -252,19 +252,20 @@ def build_pdf(nome,dias_rows,conn,user_id):
                           rightMargin=2.2*cm,leftMargin=2.2*cm,
                           topMargin=3.5*cm,bottomMargin=2.5*cm)
     s=getSampleStyleSheet()
-    def P(n,**kw): return ParagraphStyle(n,parent=s["Normal"],fontName=FONT,**kw)
+    def P(n, fn=None, **kw):
+        return ParagraphStyle(n, parent=s["Normal"], fontName=(fn or FONT), **kw)
     st=dict(
-        titulo  =P("t",  fontName=FONT_B,fontSize=22,textColor=VD,alignment=TA_CENTER,spaceAfter=8),
+        titulo  =P("t",  fn=FONT_B,fontSize=22,textColor=VD,alignment=TA_CENTER,spaceAfter=8),
         subtit  =P("s",  fontSize=11,textColor=CZ,alignment=TA_CENTER,spaceAfter=6),
         per_l   =P("pl", fontSize=10,textColor=CL,alignment=TA_CENTER,spaceAfter=18),
-        dia     =P("d",  fontName=FONT_B,fontSize=13,textColor=VD,spaceBefore=20,spaceAfter=4),
-        periodo =P("p",  fontName=FONT_B,fontSize=11,textColor=VM,spaceBefore=12,spaceAfter=6,leftIndent=4),
-        hora    =P("h",  fontName=FONT_I,fontSize=9,textColor=CL,spaceAfter=3,leftIndent=10),
+        dia     =P("d",  fn=FONT_B,fontSize=13,textColor=VD,spaceBefore=20,spaceAfter=4),
+        periodo =P("p",  fn=FONT_B,fontSize=11,textColor=VM,spaceBefore=12,spaceAfter=6,leftIndent=4),
+        hora    =P("h",  fn=FONT_I,fontSize=9,textColor=CL,spaceAfter=3,leftIndent=10),
         alimento=P("a",  fontSize=10,textColor=colors.HexColor("#222"),spaceAfter=2,leftIndent=18,leading=15),
-        ingred  =P("i",  fontName=FONT_I,fontSize=9,textColor=CL,spaceAfter=2,leftIndent=30,leading=13),
+        ingred  =P("i",  fn=FONT_I,fontSize=9,textColor=CL,spaceAfter=2,leftIndent=30,leading=13),
         lanche  =P("l",  fontSize=10,textColor=AM,spaceAfter=2,leftIndent=10,leading=15),
         belisco =P("b",  fontSize=10,textColor=BE,spaceAfter=2,leftIndent=10,leading=15),
-        obs     =P("o",  fontName=FONT_I,fontSize=9,textColor=CZ,spaceAfter=6,leftIndent=4),
+        obs     =P("o",  fn=FONT_I,fontSize=9,textColor=CZ,spaceAfter=6,leftIndent=4),
         rodape  =P("r",  fontSize=8,textColor=CL,alignment=TA_CENTER,leading=13),
     )
     story=[
@@ -346,7 +347,7 @@ def build_pdf(nome,dias_rows,conn,user_id):
     ))
     story.append(Spacer(1,.1*cm))
     story.append(Paragraph(
-        "Desenvolvido com carinho por Laura Radünz Pedro — porque registrar o que se come também é um ato de cuidado.",
+        "Diário Alimentar · Desenvolvido por Laura Radünz Pedro · laurarp.dev@gmail.com · @lauraradunzpedro",
         st["rodape"]
     ))
     doc.build(story); buf.seek(0); return buf

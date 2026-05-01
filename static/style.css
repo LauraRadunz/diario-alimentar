@@ -402,9 +402,6 @@ body {
 }
 
 .btn-deletar {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: none;
   border: none;
   font-size: 16px;

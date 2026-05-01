@@ -51,9 +51,10 @@ def sincronizar_admin():
 
 def verificar_login(username: str, senha: str):
     conn  = get_db()
+    # Aceita login por username OU por e-mail
     user  = conn.execute(
-        "SELECT * FROM usuarios WHERE username=? AND password=?",
-        (username, _hash(senha))
+        "SELECT * FROM usuarios WHERE (username=? OR email=?) AND password=?",
+        (username, username, _hash(senha))
     ).fetchone()
     conn.close()
     return dict(user) if user else None
